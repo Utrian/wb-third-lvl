@@ -54,7 +54,7 @@ func initFlags() {
 func main() {
 	initFlags()
 
-	path := "/home/paul/go/src/github.com/wb-third-lvl/develop/dev03/text.txt"
+	path := "/home/paul/go/src/github.com/wb-third-lvl/develop/dev03/files/text.txt"
 
 	// Открываем файл
 	file, err := os.Open(path)
