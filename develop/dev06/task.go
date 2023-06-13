@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+// Реализовать аналог консольного cut с флагами: -f, -d, -s
+
 var (
 	fFields    string
 	fDelimiter string

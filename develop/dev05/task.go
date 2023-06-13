@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+// Реализовать утилиту фильтрации - аналог grep
+
 var (
 	fAfter      int
 	fBefore     int

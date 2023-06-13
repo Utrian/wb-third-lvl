@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// The or-channel
+// The or-channel pattern
 // https://www.oreilly.com/library/view/concurrency-in-go/9781491941294/ch04.html#callout_concurrency_patterns_in_go_CO5-1
 
 func main() {
