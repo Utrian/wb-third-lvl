@@ -12,12 +12,11 @@ import (
 // поддержкой ряда простейших команд: cd, pwd, echo, kill, ps
 
 func main() {
+	reader := bufio.NewReader(os.Stdin)
+
 	for {
 		// Приглашение
 		fmt.Print("P$ ")
-
-		// Ридер для чтения команд
-		reader := bufio.NewReader(os.Stdin)
 
 		// Получаем введенную команду
 		input, _ := reader.ReadString('\n')
@@ -37,11 +36,11 @@ func main() {
 			// Если аргументы отсутствуют, то меняем
 			// текущую директорию на пользовательскую
 			if len(args) < 2 {
-				wordDirectory, err := os.UserHomeDir()
+				homeDir, err := os.UserHomeDir()
 				if err != nil {
 					fmt.Println(err)
 				}
-				args = append(args, wordDirectory)
+				args = append(args, homeDir)
 			}
 			// В обратном случае, просто меняем директорию
 			// на указанную в аргументе
@@ -49,6 +48,21 @@ func main() {
 			if err != nil {
 				fmt.Println(err)
 				continue
+			}
+		// Блок fork
+		case "fork":
+			// Передаем имя текущего исполняемого файла и переданные ему
+			// аргументы
+			cmd := exec.Command(os.Args[0], append(os.Args[1:], "forked")...)
+			// Созданный процесс наследует stdin, -out, -err
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			// Т.к. мы создаем отдельный процесс, то просто запускаем его
+			// не дожидаясь завершения используя Start()
+			err := cmd.Start()
+			if err != nil {
+				fmt.Println("Error:", err)
 			}
 
 		// Данный блок покрывает большинство утилит:
