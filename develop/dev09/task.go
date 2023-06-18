@@ -14,20 +14,20 @@ import (
 func main() {
 	if len(os.Args) != 2 {
 		fmt.Println("Usage: go run main.go <url>")
-		return
+		os.Exit(1)
 	}
 
 	url := os.Args[1]
 
 	if err := urlValid(url); err != nil {
 		fmt.Println("error:", err)
-		return
+		os.Exit(1)
 	}
 
 	resp, err := http.Get(url)
 	if err != nil {
 		fmt.Println("error:", err)
-		return
+		os.Exit(1)
 	}
 
 	defer resp.Body.Close()
@@ -36,14 +36,14 @@ func main() {
 	file, err := os.Create(base)
 	if err != nil {
 		fmt.Println("error:", err)
-		return
+		os.Exit(1)
 	}
 	defer file.Close()
 
 	_, err = io.Copy(file, resp.Body)
 	if err != nil {
 		fmt.Println("error:", err)
-		return
+		os.Exit(1)
 	}
 
 	fmt.Println("Downloaded:", base)
