@@ -1,13 +1,13 @@
 package main
 
 import (
-	"bufio"
 	"flag"
-	"fmt"
+	"io"
 	"net"
 	"os"
 	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -42,50 +42,39 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Создаем TCP-соединение
 	addr := builAddress(args)
-	timeout := time.Duration(*fTimeout) * time.Second
-	conn, err := net.DialTimeout("tcp", addr, timeout)
+	conn, err := net.Dial("tcp", addr)
 	if err != nil {
 		logrus.Error(err)
 		os.Exit(1)
 	}
 	defer conn.Close()
 
-	// Выход по Ctrl + D
-	sgChan := make(chan os.Signal, 1)
-	signal.Notify(sgChan, os.Interrupt)
+	// Выход по Ctrl + С
+	gracefulShutdown := make(chan os.Signal, 1)
+	signal.Notify(gracefulShutdown, syscall.SIGINT, syscall.SIGTERM)
+
 	go func() {
-		for range sgChan {
-			logrus.Info("Received an interrupt, stopping services...")
-			conn.Close()
-			os.Exit(0)
-		}
+		<-time.After(time.Duration(*fTimeout) * time.Second)
+		gracefulShutdown <- os.Interrupt
 	}()
 
 	// Общение клиента с сервером
-	clientReader := bufio.NewReader(os.Stdin)
-	serverReader := bufio.NewReader(conn)
-	for {
-		fmt.Print(">> ")
-		sendText, _ := clientReader.ReadString('\n')
-		_, err := fmt.Fprintln(conn, sendText)
-		if err != nil {
-			logrus.Info("timeout is over")
-			return
-		}
+	go copyTo(gracefulShutdown, os.Stdout, conn) // читаем из сокета
+	go copyTo(gracefulShutdown, conn, os.Stdin)  // пишем в сокет
 
-		rcvText, err := serverReader.ReadString('\n')
-		if err != nil {
-			logrus.Error(err)
-			return
-		}
+	<-gracefulShutdown
+	logrus.Info("connection was closed")
+}
 
-		fmt.Print(rcvText)
+func copyTo(gracefulShutdown chan os.Signal, dst io.Writer, src io.Reader) {
+	if _, err := io.Copy(dst, src); err != nil {
+		logrus.Info(err)
+		gracefulShutdown <- os.Interrupt
 	}
 }
 
-// Принимает слайс строк, где первая строка ip/host,
-// вторая строка port и возвращает в виде: "[ip/host]:[port]"
 func builAddress(args []string) string {
 	var b strings.Builder
 
