@@ -1,5 +1,5 @@
 ### Что выведет программа? Объяснить вывод программы.
-```
+```go
 type customError struct {
 	msg string
 }
@@ -23,3 +23,9 @@ func main() {
 	println("ok")
 }
 ```
+
+Ответ:
+```
+error
+```
+Это происходит, т.к. customError реализует интерфейс error - таже причина, что и в listing03.
