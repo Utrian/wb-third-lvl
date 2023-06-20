@@ -53,7 +53,7 @@ func main() {
 
 	// Выход по Ctrl + С
 	gracefulShutdown := make(chan os.Signal, 1)
-	signal.Notify(gracefulShutdown, syscall.SIGINT, syscall.SIGTERM)
+	signal.Notify(gracefulShutdown, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
 	go func() {
 		<-time.After(time.Duration(*fTimeout) * time.Second)
