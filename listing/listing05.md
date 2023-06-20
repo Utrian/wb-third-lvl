@@ -7,12 +7,14 @@ type customError struct {
 func (e *customError) Error() string {
 	return e.msg
 }
+
 func test() *customError {
 	{
 		// do something
 	}
 	return nil
 }
+
 func main() {
 	var err error
 	err = test()
@@ -24,7 +26,7 @@ func main() {
 }
 ```
 
-Ответ:
+### Ответ:
 ```
 error
 ```
